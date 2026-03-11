@@ -19,6 +19,7 @@ os.environ['HF_ENDPOINT'] = HF_ENDPOINT
 st.set_page_config(page_title="王者荣耀知识问答", page_icon="🎮", layout="wide")
 st.title("🎮 王者荣耀知识问答机器人")
 st.markdown("基于装备数据的智能问答助手，可回答装备属性、效果等问题。")
+st.markdown("👤 **作者：** FanSM")
 
 if "qa_chain" not in st.session_state:
     with st.spinner("加载知识库和模型中..."):
