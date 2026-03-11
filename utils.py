@@ -1,4 +1,5 @@
 import os
+import torch
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -38,12 +39,13 @@ def load_or_create_vectorstore(chunks):
     如果存在本地索引文件则加载，否则创建并保存。
     返回 (vectorstore, embedding_model)
     """
+    # 自动选择设备：有 GPU 用 cuda，否则用 cpu
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     embedding = HuggingFaceEmbeddings(
         model_name=EMBEDDING_MODEL,
-        model_kwargs={'device': 'cuda'},
+        model_kwargs={'device': device},
         encode_kwargs={'normalize_embeddings': True, 'batch_size': 32}
     )
-
     # 检查索引文件是否存在（而不是仅检查目录）
     index_file = os.path.join(FAISS_INDEX_PATH, "index.faiss")
     if os.path.exists(index_file):
