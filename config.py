@@ -13,7 +13,7 @@ THRESHOLD = 0.5         # 重排序相关性阈值（低于此值则返回空）
 
 # 模型配置
 EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
+RERANKER_MODEL = "BAAI/bge-reranker-base"   # 从 v2-m3 改为 base
 LLM_MODEL = "deepseek-chat"
 TEMPERATURE = 0.3
 MAX_TOKENS = 200
