@@ -46,19 +46,11 @@ if "qa_chain" not in st.session_state:
             max_tokens=MAX_TOKENS
         )
 
-        # 5. HyDE 检索器（召回更多文档供重排序）
-        hyde = HyDERetriever(
-            llm=llm,
-            vectorstore=vectorstore,
-            base_kwargs={"search_kwargs": {"k": HYDE_K}}
-        )
+        # 5. HyDE 检索器
+        hyde = HyDERetriever(llm=llm, vectorstore=vectorstore, base_kwargs={"search_kwargs": {"k": HYDE_K}})
 
         # 6. 重排序检索器
-        rerank = RerankRetriever(
-            base=hyde,
-            initial_k=INITIAL_K,
-            final_k=TOP_K
-        )
+        rerank = RerankRetriever(base=hyde, initial_k=INITIAL_K, final_k=TOP_K)
 
         # 7. 提示模板
         prompt = PromptTemplate.from_template("""你是一名王者荣耀装备专家，基于以下信息回答问题，若不知道则说不知道。

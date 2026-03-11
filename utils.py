@@ -1,3 +1,4 @@
+
 import os
 import torch
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
@@ -7,7 +8,7 @@ from langchain_community.vectorstores import FAISS
 from config import KNOWLEDGE_PATH, EMBEDDING_MODEL, HF_ENDPOINT, FAISS_INDEX_PATH
 
 # 设置 Hugging Face 镜像（必须最先设置）
-os.environ['HF_ENDPOINT'] = HF_ENDPOINT
+os.environ['HF_ENDPOINT'] = ' "https://hf-mirror.com"'
 
 def load_and_split_documents(chunk_size=500, chunk_overlap=0):
     """加载知识库文档并按装备块分割"""

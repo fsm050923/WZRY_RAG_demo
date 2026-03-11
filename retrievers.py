@@ -7,7 +7,7 @@ from langchain_core.documents import Document
 from pydantic import Field
 from sentence_transformers import CrossEncoder
 from config import THRESHOLD
-
+from typing import Optional
 logger = logging.getLogger(__name__)
 
 class HyDERetriever(BaseRetriever):
@@ -40,37 +40,47 @@ class HyDERetriever(BaseRetriever):
 
 class RerankRetriever(BaseRetriever):
     """
-    带重排序和阈值过滤的检索器。
-    先用基础检索器召回候选文档，然后用交叉编码器重排序，
-    最后根据阈值过滤，返回前 final_k 个文档。
+    带重排序和阈值过滤的检索器，使用惰性加载降低启动内存。
+    重排序模型在第一次调用时才加载。
     """
     base: Any = Field(description="基础检索器")
-    reranker: Any = Field(description="重排序模型")
-    initial_k: int = Field(default=20)   # 此参数仅用于说明，实际由基础检索器控制
+    reranker: Optional[Any] = Field(default=None, description="重排序模型（惰性加载）")
+    model_name: str = Field(description="重排序模型名称")
+    device: str = Field(description="运行设备（cpu/cuda）")
+    initial_k: int = Field(default=20)
     final_k: int = Field(default=5)
 
     def __init__(self, base, model_name="BAAI/bge-reranker-v2-m3", initial_k=20, final_k=5, **kwargs):
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        reranker = CrossEncoder(model_name, device=device)
-        super().__init__(base=base, reranker=reranker, initial_k=initial_k, final_k=final_k, **kwargs)
+        # 注意：这里不加载模型，只保存配置信息
+        super().__init__(
+            base=base,
+            reranker=None,          # 初始为 None
+            model_name=model_name,
+            device=device,
+            initial_k=initial_k,
+            final_k=final_k,
+            **kwargs
+        )
 
     def _get_relevant_documents(
         self, query: str, *, run_manager: CallbackManagerForRetrieverRun
     ) -> List[Document]:
+        # 1. 如果重排序模型尚未加载，则现在加载（惰性加载）
+        if self.reranker is None:
+            self.reranker = CrossEncoder(self.model_name, device=self.device)
+
         candidates = self.base.invoke(query) or []
         if not candidates:
             return []
 
-        # 构造 (query, doc) 对并计算分数
         pairs = [(query, doc.page_content) for doc in candidates]
         scores = list(self.reranker.predict(pairs))
 
-        # 按分数降序排序
+        # 阈值过滤（从 config 导入）
+        from config import THRESHOLD
         scored = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)
-
-        # 阈值过滤：如果最高分低于阈值，返回空列表
         if scored and scored[0][1] < THRESHOLD:
             return []
 
-        # 返回前 final_k 个文档
         return [doc for doc, _ in scored[:self.final_k]]
