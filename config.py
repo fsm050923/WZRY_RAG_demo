@@ -12,7 +12,7 @@ INITIAL_K = 30          # 重排序初始候选数
 THRESHOLD = 0.5         # 重排序相关性阈值（低于此值则返回空）
 
 # 模型配置
-EMBEDDING_MODEL = "BAAI/bge-m3"
+EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
 LLM_MODEL = "deepseek-chat"
 TEMPERATURE = 0.3
