@@ -16,10 +16,24 @@ from retrievers import HyDERetriever, RerankRetriever
 # 设置 Hugging Face 镜像
 os.environ['HF_ENDPOINT'] = HF_ENDPOINT
 
+
+
 st.set_page_config(page_title="王者荣耀知识问答", page_icon="🎮", layout="wide")
+
+# 👇 侧边栏个人信息
+with st.sidebar:
+    st.header("👤 关于作者")
+    st.markdown("**姓名：** FanSM")
+    st.markdown("**GitHub：** (https://github.com/fsm050923/WZRY_RAG_demo)")
+    st.markdown("---")
+    st.markdown("**项目说明**：基于 RAG 的王者荣耀装备问答系统")
+
 st.title("🎮 王者荣耀知识问答机器人")
 st.markdown("基于装备数据的智能问答助手，可回答装备属性、效果等问题。")
+# 👇 标题下作者信息
 st.markdown("👤 **作者：** FanSM")
+
+# ... 后续代码保持不变 ...
 
 if "qa_chain" not in st.session_state:
     with st.spinner("加载知识库和模型中..."):
